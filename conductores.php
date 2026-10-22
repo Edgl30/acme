@@ -1,83 +1,167 @@
 
-<form method="POST" action="guardar_conductor.php">
-    <label for="cedula">Documento de identidad:</label>
-    <input
-        type="text"
-        id="cedula"
-        name="cedula"
-        required
-        inputmode="numeric"
-        pattern="[0-9]+"
-        title="Ingrese solamente números."
-        maxlength="20"
-        placeholder="Ej. 1023456789"
-    >
+<?php
+require_once __DIR__ . '/config/conexion.php';
 
-    <label for="primer_nombre">Primer nombre:</label>
-    <input
-        type="text"
-        id="primer_nombre"
-        name="primer_nombre"
-        required
-        pattern="[A-Za-zÁÉÍÓÚáéíóúÜüÑñ ]+"
-        title="Ingrese solamente letras y espacios."
-        maxlength="60"
-    >
+function e($valor) {
+    return htmlspecialchars((string) $valor, ENT_QUOTES, 'UTF-8');
+}
 
-    <label for="segundo_nombre">Segundo nombre (opcional):</label>
-    <input
-        type="text"
-        id="segundo_nombre"
-        name="segundo_nombre"
-        pattern="[A-Za-zÁÉÍÓÚáéíóúÜüÑñ ]*"
-        title="Ingrese solamente letras y espacios."
-        maxlength="60"
-    >
+$conductores = $pdo->query(
+    "SELECT cedula, primer_nombre, segundo_nombre, apellidos,
+            direccion, telefono, ciudad
+     FROM conductores
+     ORDER BY primer_nombre, apellidos"
+)->fetchAll();
 
-    <label for="apellidos">Apellidos:</label>
-    <input
-        type="text"
-        id="apellidos"
-        name="apellidos"
-        required
-        pattern="[A-Za-zÁÉÍÓÚáéíóúÜüÑñ ]+"
-        title="Ingrese solamente letras y espacios."
-        maxlength="120"
-    >
+$mensajes = [
+    'guardado' => 'Conductor registrado correctamente.',
+    'datos' => 'Verifica los datos: documento numérico, nombres y ciudad con letras, y teléfono de 10 dígitos.',
+    'duplicado' => 'La cédula ya está registrada.',
+    'bd' => 'No fue posible guardar el conductor. Revisa los registros de PHP.'
+];
 
-    <label for="direccion">Dirección:</label>
-    <input
-        type="text"
-        id="direccion"
-        name="direccion"
-        required
-        maxlength="180"
-    >
+$codigo = $_GET['estado'] ?? '';
+$mensaje = $mensajes[$codigo] ?? null;
+$esError = in_array($codigo, ['datos', 'duplicado', 'bd'], true);
+?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conductores | Transportes ACME</title>
+    <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+<main>
+    <h1>Registro de conductores</h1>
+    <p>Transportes ACME S.A.</p>
+    <p><a href="index.php">Volver al menú principal</a></p>
 
-    <label for="telefono">Teléfono:</label>
-    <input
-        type="tel"
-        id="telefono"
-        name="telefono"
-        required
-        inputmode="numeric"
-        pattern="[0-9]{10}"
-        title="Ingrese exactamente 10 dígitos numéricos."
-        maxlength="10"
-        minlength="10"
-        placeholder="Ej. 3001234567"
-    >
+    <?php if ($mensaje !== null): ?>
+        <p role="<?= $esError ? 'alert' : 'status' ?>">
+            <?= e($mensaje) ?>
+        </p>
+    <?php endif; ?>
 
-    <label for="ciudad">Ciudad:</label>
-    <input
-        type="text"
-        id="ciudad"
-        name="ciudad"
-        required
-        pattern="[A-Za-zÁÉÍÓÚáéíóúÜüÑñ ]+"
-        title="Ingrese solamente letras y espacios."
-        maxlength="80"
-    >
+    <form method="POST" action="guardar_conductor.php">
+        <label for="cedula">Número de cédula *</label>
+        <input
+            type="text"
+            id="cedula"
+            name="cedula"
+            maxlength="20"
+            pattern="[0-9]+"
+            inputmode="numeric"
+            title="Ingrese únicamente números."
+            required
+        >
 
-    <button type="submit">Guardar conductor</button>
-</form>
+        <label for="primer_nombre">Primer nombre *</label>
+        <input
+            type="text"
+            id="primer_nombre"
+            name="primer_nombre"
+            maxlength="60"
+            pattern="[A-Za-zÁÉÍÓÚáéíóúÜüÑñ ]+"
+            title="Ingrese únicamente letras y espacios."
+            required
+        >
+
+        <label for="segundo_nombre">Segundo nombre</label>
+        <input
+            type="text"
+            id="segundo_nombre"
+            name="segundo_nombre"
+            maxlength="60"
+            pattern="[A-Za-zÁÉÍÓÚáéíóúÜüÑñ ]*"
+            title="Ingrese únicamente letras y espacios."
+        >
+
+        <label for="apellidos">Apellidos *</label>
+        <input
+            type="text"
+            id="apellidos"
+            name="apellidos"
+            maxlength="120"
+            pattern="[A-Za-zÁÉÍÓÚáéíóúÜüÑñ ]+"
+            title="Ingrese únicamente letras y espacios."
+            required
+        >
+
+        <label for="direccion">Dirección *</label>
+        <input
+            type="text"
+            id="direccion"
+            name="direccion"
+            maxlength="180"
+            required
+        >
+
+        <label for="telefono">Teléfono *</label>
+        <input
+            type="tel"
+            id="telefono"
+            name="telefono"
+            maxlength="10"
+            minlength="10"
+            pattern="[0-9]{10}"
+            inputmode="numeric"
+            title="Ingrese exactamente 10 dígitos numéricos."
+            placeholder="Ej. 3001234567"
+            required
+        >
+
+        <label for="ciudad">Ciudad *</label>
+        <input
+            type="text"
+            id="ciudad"
+            name="ciudad"
+            maxlength="80"
+            pattern="[A-Za-zÁÉÍÓÚáéíóúÜüÑñ ]+"
+            title="Ingrese únicamente letras y espacios."
+            required
+        >
+
+        <button type="submit">Guardar conductor</button>
+    </form>
+
+    <h2>Conductores registrados</h2>
+
+    <div style="overflow-x:auto">
+        <table>
+            <thead>
+                <tr>
+                    <th>Cédula</th>
+                    <th>Nombre completo</th>
+                    <th>Dirección</th>
+                    <th>Teléfono</th>
+                    <th>Ciudad</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($conductores as $c): ?>
+                    <tr>
+                        <td><?= e($c['cedula']) ?></td>
+                        <td><?= e(trim(
+                            $c['primer_nombre'] . ' ' .
+                            ($c['segundo_nombre'] ?? '') . ' ' .
+                            $c['apellidos']
+                        )) ?></td>
+                        <td><?= e($c['direccion']) ?></td>
+                        <td><?= e($c['telefono']) ?></td>
+                        <td><?= e($c['ciudad']) ?></td>
+                    </tr>
+                <?php endforeach; ?>
+
+                <?php if (!$conductores): ?>
+                    <tr>
+                        <td colspan="5">Todavía no hay conductores registrados.</td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+</main>
+</body>
+</html>
