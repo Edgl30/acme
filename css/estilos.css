@@ -46,3 +46,340 @@ select {
     border-radius: 6px;
     background: white;
 }
+
+
+/* ===== HEADER ===== */
+.encabezado {
+    background: #202b3c;
+    color: #ffffff;
+    padding: 16px 24px;
+    margin: -20px -20px 24px;
+}
+
+.contenedor-header {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.logo-acme {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.logo-icono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 55px;
+    height: 45px;
+    border-radius: 8px;
+    background: #ad272f;
+    color: #ffffff;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.logo-texto {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.logo-texto small {
+    color: #d8dee8;
+}
+
+/* ===== NAVEGACIÓN ===== */
+.navegacion-principal {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.navegacion-principal a {
+    color: #ffffff;
+    text-decoration: none;
+    padding: 10px 12px;
+    border-radius: 6px;
+    transition: background 0.2s ease;
+}
+
+.navegacion-principal a:hover,
+.navegacion-principal a[aria-current="page"] {
+    background: #ad272f;
+    color: #ffffff;
+}
+
+/* ===== CONTENIDO ===== */
+.contenido-principal {
+    min-height: 60vh;
+}
+
+/* ===== FOOTER ===== */
+.pie-pagina {
+    margin-top: 40px;
+    padding: 24px;
+    background: #202b3c;
+    color: #ffffff;
+}
+
+.contenedor-footer {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.contenedor-footer p {
+    margin-bottom: 0;
+    color: #d8dee8;
+}
+
+.footer-derechos {
+    text-align: right;
+    font-size: 14px;
+}
+
+/* ========================================
+   ESTILO GENERAL DE TRANSPORTES ACME
+======================================== */
+
+html {
+    min-height: 100%;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #f4f6fa;
+    color: #263244;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+/* ========================================
+   HEADER
+======================================== */
+
+.encabezado {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 18px 5%;
+    background: #172437;
+    border-bottom: 4px solid #ad272f;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
+}
+
+.contenedor-header {
+    width: 100%;
+    max-width: 1250px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 28px;
+}
+
+.logo-acme {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.logo-icono {
+    width: 58px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: #ad272f;
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 10px rgba(173, 39, 47, 0.3);
+}
+
+.logo-texto {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.logo-texto strong {
+    font-size: 18px;
+    letter-spacing: 0.2px;
+}
+
+.logo-texto small {
+    color: #bdc8d7;
+    font-size: 12px;
+}
+
+/* ========================================
+   MENÚ DE NAVEGACIÓN
+======================================== */
+
+.navegacion-principal {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.navegacion-principal a {
+    display: inline-block;
+    padding: 11px 14px;
+    border-radius: 7px;
+    color: #e6ebf2;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.navegacion-principal a:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+.navegacion-principal a[aria-current="page"] {
+    background: #ad272f;
+    color: #ffffff;
+}
+
+/* ========================================
+   CONTENIDO DE CADA PÁGINA
+======================================== */
+
+.contenido-principal {
+    flex: 1;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 28px 5%;
+}
+
+.contenido-principal main {
+    width: 100%;
+    max-width: 1250px;
+    box-sizing: border-box;
+    margin: 0 auto;
+}
+
+/* ========================================
+   FOOTER
+======================================== */
+
+.pie-pagina {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 26px 5%;
+    background: #172437;
+    border-top: 4px solid #ad272f;
+    color: #ffffff;
+}
+
+.contenedor-footer {
+    max-width: 1250px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+}
+
+.contenedor-footer strong {
+    font-size: 15px;
+}
+
+.contenedor-footer p {
+    margin: 7px 0 0;
+    color: #bdc8d7;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.footer-derechos {
+    text-align: right;
+    color: #e6ebf2;
+    font-size: 13px;
+}
+
+.footer-derechos p {
+    margin-top: 5px;
+}
+
+/* ========================================
+   RESPONSIVE: CELULARES Y TABLETAS
+======================================== */
+
+@media (max-width: 900px) {
+    .contenedor-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .navegacion-principal {
+        justify-content: flex-start;
+        width: 100%;
+    }
+
+    .navegacion-principal a {
+        padding: 10px;
+    }
+}
+
+@media (max-width: 600px) {
+    .encabezado {
+        padding: 18px 5%;
+    }
+
+    .contenido-principal {
+        padding: 20px 4%;
+    }
+
+    .logo-texto strong {
+        font-size: 16px;
+    }
+
+    .navegacion-principal {
+        gap: 4px;
+    }
+
+    .navegacion-principal a {
+        padding: 9px;
+        font-size: 13px;
+    }
+
+    .contenedor-footer {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .footer-derechos {
+        text-align: left;
+    }
+}

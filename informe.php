@@ -1,4 +1,4 @@
-
+<?php require_once __DIR__ . '/includes/header.php'; ?>
 <?php
 require_once __DIR__ . '/config/conexion.php';
 
@@ -88,3 +88,4 @@ function e($valor) {
 </main>
 </body>
 </html>
+<?php require_once __DIR__ . '/includes/footer.php'; ?>

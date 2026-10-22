@@ -1,4 +1,4 @@
-
+<?php require_once __DIR__ . '/includes/header.php'; ?>
 <?php
 require_once __DIR__ . '/config/conexion.php';
 
@@ -198,3 +198,4 @@ $esError = in_array($codigo, ['datos', 'duplicado', 'bd'], true);
 </main>
 </body>
 </html>
+<?php require_once __DIR__ . '/includes/footer.php'; ?>
