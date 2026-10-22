@@ -2,64 +2,6 @@
 <?php
 require_once __DIR__ . '/config/conexion.php';
 
-$errores = [];
-$datos = [
-    'cedula' => '',
-    'primer_nombre' => '',
-    'segundo_nombre' => '',
-    'apellidos' => '',
-    'direccion' => '',
-    'telefono' => '',
-    'ciudad' => ''
-];
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    foreach ($datos as $campo => $valor) {
-        $datos[$campo] = trim($_POST[$campo] ?? '');
-    }
-
-    foreach ([
-        'cedula' => 'La cédula',
-        'primer_nombre' => 'El primer nombre',
-        'apellidos' => 'Los apellidos',
-        'direccion' => 'La dirección',
-        'telefono' => 'El teléfono',
-        'ciudad' => 'La ciudad'
-    ] as $campo => $nombre) {
-        if ($datos[$campo] === '') {
-            $errores[] = "$nombre es obligatorio.";
-        }
-    }
-
-    if ($datos['segundo_nombre'] === '') {
-        $datos['segundo_nombre'] = null;
-    }
-
-    if (!$errores) {
-        try {
-            $sql = "INSERT INTO propietarios
-                (cedula, primer_nombre, segundo_nombre, apellidos,
-                 direccion, telefono, ciudad)
-                VALUES
-                (:cedula, :primer_nombre, :segundo_nombre, :apellidos,
-                 :direccion, :telefono, :ciudad)";
-
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute($datos);
-
-            header('Location: propietarios.php?guardado=1');
-            exit;
-        } catch (PDOException $e) {
-            if ($e->getCode() === '23000') {
-                $errores[] = 'La cédula ya está registrada.';
-            } else {
-                error_log($e->getMessage());
-                $errores[] = 'No fue posible guardar el propietario.';
-            }
-        }
-    }
-}
-
 function e($valor) {
     return htmlspecialchars((string) $valor, ENT_QUOTES, 'UTF-8');
 }
@@ -70,6 +12,17 @@ $propietarios = $pdo->query(
      FROM propietarios
      ORDER BY primer_nombre, apellidos"
 )->fetchAll();
+
+$mensajes = [
+    'guardado' => 'Propietario registrado correctamente.',
+    'datos' => 'Completa todos los campos obligatorios.',
+    'duplicado' => 'La cédula ya está registrada.',
+    'bd' => 'No fue posible guardar el propietario. Revisa los registros de PHP.'
+];
+
+$codigo = $_GET['estado'] ?? '';
+$mensaje = $mensajes[$codigo] ?? null;
+$esError = in_array($codigo, ['datos', 'duplicado', 'bd'], true);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -86,48 +39,33 @@ $propietarios = $pdo->query(
 
     <p><a href="index.php">Volver al menú principal</a></p>
 
-    <?php if (isset($_GET['guardado'])): ?>
-        <p role="status">Propietario registrado correctamente.</p>
+    <?php if ($mensaje !== null): ?>
+        <p role="<?= $esError ? 'alert' : 'status' ?>">
+            <?= e($mensaje) ?>
+        </p>
     <?php endif; ?>
 
-    <?php if ($errores): ?>
-        <div role="alert">
-            <ul>
-                <?php foreach ($errores as $error): ?>
-                    <li><?= e($error) ?></li>
-                <?php endforeach; ?>
-            </ul>
-        </div>
-    <?php endif; ?>
-
-    <form method="POST" action="propietarios.php">
+    <form method="POST" action="guardar_propietario.php">
         <label for="cedula">Número de cédula *</label>
-        <input id="cedula" name="cedula" maxlength="20"
-               value="<?= e($datos['cedula']) ?>" required>
+        <input id="cedula" name="cedula" maxlength="20" required>
 
         <label for="primer_nombre">Primer nombre *</label>
-        <input id="primer_nombre" name="primer_nombre" maxlength="60"
-               value="<?= e($datos['primer_nombre']) ?>" required>
+        <input id="primer_nombre" name="primer_nombre" maxlength="60" required>
 
         <label for="segundo_nombre">Segundo nombre</label>
-        <input id="segundo_nombre" name="segundo_nombre" maxlength="60"
-               value="<?= e($datos['segundo_nombre']) ?>">
+        <input id="segundo_nombre" name="segundo_nombre" maxlength="60">
 
         <label for="apellidos">Apellidos *</label>
-        <input id="apellidos" name="apellidos" maxlength="120"
-               value="<?= e($datos['apellidos']) ?>" required>
+        <input id="apellidos" name="apellidos" maxlength="120" required>
 
         <label for="direccion">Dirección *</label>
-        <input id="direccion" name="direccion" maxlength="180"
-               value="<?= e($datos['direccion']) ?>" required>
+        <input id="direccion" name="direccion" maxlength="180" required>
 
         <label for="telefono">Teléfono *</label>
-        <input id="telefono" name="telefono" maxlength="25"
-               value="<?= e($datos['telefono']) ?>" required>
+        <input id="telefono" name="telefono" maxlength="25" required>
 
         <label for="ciudad">Ciudad *</label>
-        <input id="ciudad" name="ciudad" maxlength="80"
-               value="<?= e($datos['ciudad']) ?>" required>
+        <input id="ciudad" name="ciudad" maxlength="80" required>
 
         <button type="submit">Guardar propietario</button>
     </form>

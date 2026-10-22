@@ -2,66 +2,6 @@
 <?php
 require_once __DIR__ . '/config/conexion.php';
 
-$errores = [];
-$datos = [
-    'placa' => '',
-    'color' => '',
-    'marca' => '',
-    'tipo' => 'particular',
-    'conductor_cedula' => '',
-    'propietario_cedula' => ''
-];
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    foreach ($datos as $campo => $valor) {
-        $datos[$campo] = trim($_POST[$campo] ?? '');
-    }
-
-    foreach ([
-        'placa' => 'La placa',
-        'color' => 'El color',
-        'marca' => 'La marca',
-        'tipo' => 'El tipo',
-        'conductor_cedula' => 'El conductor',
-        'propietario_cedula' => 'El propietario'
-    ] as $campo => $nombre) {
-        if ($datos[$campo] === '') {
-            $errores[] = "$nombre es obligatorio.";
-        }
-    }
-
-    $datos['placa'] = strtoupper($datos['placa']);
-
-    if (!in_array($datos['tipo'], ['particular', 'publico'], true)) {
-        $errores[] = 'El tipo de vehículo no es válido.';
-    }
-
-    if (!$errores) {
-        try {
-            $sql = "INSERT INTO vehiculos
-                (placa, color, marca, tipo, conductor_cedula,
-                 propietario_cedula)
-                VALUES
-                (:placa, :color, :marca, :tipo, :conductor_cedula,
-                 :propietario_cedula)";
-
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute($datos);
-
-            header('Location: vehiculos.php?guardado=1');
-            exit;
-        } catch (PDOException $e) {
-            if ($e->getCode() === '23000') {
-                $errores[] =
-                    'La placa ya existe o el conductor/propietario seleccionado no es válido.';
-            } else {
-                error_log($e->getMessage());
-                $errores[] = 'No fue posible guardar el vehículo.';
-            }
-        }
-    }
-}
-
 function e($valor) {
     return htmlspecialchars((string) $valor, ENT_QUOTES, 'UTF-8');
 }
@@ -78,21 +18,33 @@ $propietarios = $pdo->query(
      ORDER BY primer_nombre, apellidos"
 )->fetchAll();
 
-$vehiculos = $pdo->query(
-    "SELECT v.placa, v.color, v.marca, v.tipo,
+$sql = "SELECT
+            v.placa, v.color, v.marca, v.tipo,
             c.primer_nombre AS conductor_nombre,
             c.segundo_nombre AS conductor_segundo_nombre,
             c.apellidos AS conductor_apellidos,
             p.primer_nombre AS propietario_nombre,
             p.segundo_nombre AS propietario_segundo_nombre,
             p.apellidos AS propietario_apellidos
-     FROM vehiculos v
-     INNER JOIN conductores c
-         ON v.conductor_cedula = c.cedula
-     INNER JOIN propietarios p
-         ON v.propietario_cedula = p.cedula
-     ORDER BY v.placa"
-)->fetchAll();
+        FROM vehiculos v
+        INNER JOIN conductores c
+            ON v.conductor_cedula = c.cedula
+        INNER JOIN propietarios p
+            ON v.propietario_cedula = p.cedula
+        ORDER BY v.placa";
+
+$vehiculos = $pdo->query($sql)->fetchAll();
+
+$mensajes = [
+    'guardado' => 'Vehículo registrado correctamente.',
+    'datos' => 'Completa todos los campos obligatorios.',
+    'duplicado' => 'La placa ya existe o el conductor o propietario no es válido.',
+    'bd' => 'No fue posible guardar el vehículo. Revisa los registros de PHP.'
+];
+
+$codigo = $_GET['estado'] ?? '';
+$mensaje = $mensajes[$codigo] ?? null;
+$esError = in_array($codigo, ['datos', 'duplicado', 'bd'], true);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -106,51 +58,34 @@ $vehiculos = $pdo->query(
 <main>
     <h1>Registro de vehículos</h1>
     <p>Transportes ACME S.A.</p>
-
     <p><a href="index.php">Volver al menú principal</a></p>
 
-    <?php if (isset($_GET['guardado'])): ?>
-        <p role="status">Vehículo registrado correctamente.</p>
-    <?php endif; ?>
-
-    <?php if ($errores): ?>
-        <div role="alert">
-            <ul>
-                <?php foreach ($errores as $error): ?>
-                    <li><?= e($error) ?></li>
-                <?php endforeach; ?>
-            </ul>
-        </div>
+    <?php if ($mensaje !== null): ?>
+        <p role="<?= $esError ? 'alert' : 'status' ?>">
+            <?= e($mensaje) ?>
+        </p>
     <?php endif; ?>
 
     <?php if (!$conductores || !$propietarios): ?>
         <p>
-            Primero debes registrar al menos un conductor y un propietario.
+            Primero registra al menos un conductor y un propietario
+            antes de registrar vehículos.
         </p>
     <?php else: ?>
-        <form method="POST" action="vehiculos.php">
+        <form method="POST" action="guardar_vehiculo.php">
             <label for="placa">Placa *</label>
-            <input id="placa" name="placa" maxlength="10"
-                   value="<?= e($datos['placa']) ?>" required>
+            <input id="placa" name="placa" maxlength="10" required>
 
             <label for="color">Color *</label>
-            <input id="color" name="color" maxlength="40"
-                   value="<?= e($datos['color']) ?>" required>
+            <input id="color" name="color" maxlength="40" required>
 
             <label for="marca">Marca *</label>
-            <input id="marca" name="marca" maxlength="60"
-                   value="<?= e($datos['marca']) ?>" required>
+            <input id="marca" name="marca" maxlength="60" required>
 
             <label for="tipo">Tipo de vehículo *</label>
             <select id="tipo" name="tipo" required>
-                <option value="particular"
-                    <?= $datos['tipo'] === 'particular' ? 'selected' : '' ?>>
-                    Particular
-                </option>
-                <option value="publico"
-                    <?= $datos['tipo'] === 'publico' ? 'selected' : '' ?>>
-                    Público
-                </option>
+                <option value="particular">Particular</option>
+                <option value="publico">Público</option>
             </select>
 
             <label for="conductor_cedula">Conductor *</label>
@@ -164,9 +99,7 @@ $vehiculos = $pdo->query(
                         $c['apellidos']
                     );
                     ?>
-                    <option value="<?= e($c['cedula']) ?>"
-                        <?= $datos['conductor_cedula'] === $c['cedula']
-                            ? 'selected' : '' ?>>
+                    <option value="<?= e($c['cedula']) ?>">
                         <?= e($nombre . ' — ' . $c['cedula']) ?>
                     </option>
                 <?php endforeach; ?>
@@ -183,9 +116,7 @@ $vehiculos = $pdo->query(
                         $p['apellidos']
                     );
                     ?>
-                    <option value="<?= e($p['cedula']) ?>"
-                        <?= $datos['propietario_cedula'] === $p['cedula']
-                            ? 'selected' : '' ?>>
+                    <option value="<?= e($p['cedula']) ?>">
                         <?= e($nombre . ' — ' . $p['cedula']) ?>
                     </option>
                 <?php endforeach; ?>
