@@ -6,39 +6,38 @@ function e($valor) {
     return htmlspecialchars((string) $valor, ENT_QUOTES, 'UTF-8');
 }
 
-$conductores = $pdo->query(
+// Obtener conductores y propietarios para los select
+$conductoresLista = $pdo->query(
     "SELECT cedula, primer_nombre, segundo_nombre, apellidos
      FROM conductores
      ORDER BY primer_nombre, apellidos"
 )->fetchAll();
 
-$propietarios = $pdo->query(
+$propietariosLista = $pdo->query(
     "SELECT cedula, primer_nombre, segundo_nombre, apellidos
      FROM propietarios
      ORDER BY primer_nombre, apellidos"
 )->fetchAll();
 
-$sql = "SELECT
-            v.placa, v.color, v.marca, v.tipo,
+// Obtener vehículos registrados
+$vehiculos = $pdo->query(
+    "SELECT v.placa, v.color, v.marca, v.tipo,
             c.primer_nombre AS conductor_nombre,
             c.segundo_nombre AS conductor_segundo_nombre,
             c.apellidos AS conductor_apellidos,
             p.primer_nombre AS propietario_nombre,
             p.segundo_nombre AS propietario_segundo_nombre,
             p.apellidos AS propietario_apellidos
-        FROM vehiculos v
-        INNER JOIN conductores c
-            ON v.conductor_cedula = c.cedula
-        INNER JOIN propietarios p
-            ON v.propietario_cedula = p.cedula
-        ORDER BY v.placa";
-
-$vehiculos = $pdo->query($sql)->fetchAll();
+     FROM vehiculos v
+     INNER JOIN conductores c ON v.conductor_cedula = c.cedula
+     INNER JOIN propietarios p ON v.propietario_cedula = p.cedula
+     ORDER BY v.placa"
+)->fetchAll();
 
 $mensajes = [
     'guardado' => 'Vehículo registrado correctamente.',
-    'datos' => 'Completa todos los campos obligatorios.',
-    'duplicado' => 'La placa ya existe o el conductor o propietario no es válido.',
+    'datos' => 'Verifica los datos ingresados y selecciona un conductor y propietario válidos.',
+    'duplicado' => 'La placa ya está registrada o existe una referencia inválida.',
     'bd' => 'No fue posible guardar el vehículo. Revisa los registros de PHP.'
 ];
 
@@ -66,65 +65,84 @@ $esError = in_array($codigo, ['datos', 'duplicado', 'bd'], true);
         </p>
     <?php endif; ?>
 
-    <?php if (!$conductores || !$propietarios): ?>
-        <p>
-            Primero registra al menos un conductor y un propietario
-            antes de registrar vehículos.
-        </p>
-    <?php else: ?>
-        <form method="POST" action="guardar_vehiculo.php">
-            <label for="placa">Placa *</label>
-            <input id="placa" name="placa" maxlength="10" required>
+    <form method="POST" action="guardar_vehiculo.php">
+        <label for="placa">Placa *</label>
+        <input
+            type="text"
+            id="placa"
+            name="placa"
+            maxlength="10"
+            pattern="[A-Za-z0-9-]+"
+            title="Ingrese una placa con letras, números o guion."
+            style="text-transform: uppercase;"
+            required
+        >
 
-            <label for="color">Color *</label>
-            <input id="color" name="color" maxlength="40" required>
+        <label for="color">Color *</label>
+        <input
+            type="text"
+            id="color"
+            name="color"
+            maxlength="40"
+            pattern="[A-Za-zÁÉÍÓÚáéíóúÜüÑñ ]+"
+            title="Ingrese un color usando letras y espacios."
+            required
+        >
 
-            <label for="marca">Marca *</label>
-            <input id="marca" name="marca" maxlength="60" required>
+        <label for="marca">Marca *</label>
+        <input
+            type="text"
+            id="marca"
+            name="marca"
+            maxlength="60"
+            pattern="[A-Za-z0-9ÁÉÍÓÚáéíóúÜüÑñ .-]+"
+            title="Ingrese una marca válida."
+            required
+        >
 
-            <label for="tipo">Tipo de vehículo *</label>
-            <select id="tipo" name="tipo" required>
-                <option value="particular">Particular</option>
-                <option value="publico">Público</option>
-            </select>
+        <label for="tipo">Tipo de vehículo *</label>
+        <select id="tipo" name="tipo" required>
+            <option value="">Seleccione un tipo</option>
+            <option value="particular">Particular</option>
+            <option value="publico">Público</option>
+        </select>
 
-            <label for="conductor_cedula">Conductor *</label>
-            <select id="conductor_cedula" name="conductor_cedula" required>
-                <option value="">Selecciona un conductor</option>
-                <?php foreach ($conductores as $c): ?>
-                    <?php
-                    $nombre = trim(
-                        $c['primer_nombre'] . ' ' .
-                        ($c['segundo_nombre'] ?? '') . ' ' .
-                        $c['apellidos']
-                    );
-                    ?>
-                    <option value="<?= e($c['cedula']) ?>">
-                        <?= e($nombre . ' — ' . $c['cedula']) ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
+        <label for="conductor_cedula">Conductor *</label>
+        <select id="conductor_cedula" name="conductor_cedula" required>
+            <option value="">Seleccione un conductor</option>
+            <?php foreach ($conductoresLista as $c): ?>
+                <option value="<?= e($c['cedula']) ?>">
+                    <?= e(
+                        $c['cedula'] . ' - ' .
+                        trim(
+                            $c['primer_nombre'] . ' ' .
+                            ($c['segundo_nombre'] ?? '') . ' ' .
+                            $c['apellidos']
+                        )
+                    ) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
 
-            <label for="propietario_cedula">Propietario *</label>
-            <select id="propietario_cedula" name="propietario_cedula" required>
-                <option value="">Selecciona un propietario</option>
-                <?php foreach ($propietarios as $p): ?>
-                    <?php
-                    $nombre = trim(
-                        $p['primer_nombre'] . ' ' .
-                        ($p['segundo_nombre'] ?? '') . ' ' .
-                        $p['apellidos']
-                    );
-                    ?>
-                    <option value="<?= e($p['cedula']) ?>">
-                        <?= e($nombre . ' — ' . $p['cedula']) ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
+        <label for="propietario_cedula">Propietario *</label>
+        <select id="propietario_cedula" name="propietario_cedula" required>
+            <option value="">Seleccione un propietario</option>
+            <?php foreach ($propietariosLista as $p): ?>
+                <option value="<?= e($p['cedula']) ?>">
+                    <?= e(
+                        $p['cedula'] . ' - ' .
+                        trim(
+                            $p['primer_nombre'] . ' ' .
+                            ($p['segundo_nombre'] ?? '') . ' ' .
+                            $p['apellidos']
+                        )
+                    ) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
 
-            <button type="submit">Guardar vehículo</button>
-        </form>
-    <?php endif; ?>
+        <button type="submit">Guardar vehículo</button>
+    </form>
 
     <h2>Vehículos registrados</h2>
 
@@ -133,8 +151,8 @@ $esError = in_array($codigo, ['datos', 'duplicado', 'bd'], true);
             <thead>
                 <tr>
                     <th>Placa</th>
-                    <th>Marca</th>
                     <th>Color</th>
+                    <th>Marca</th>
                     <th>Tipo</th>
                     <th>Conductor</th>
                     <th>Propietario</th>
@@ -144,9 +162,9 @@ $esError = in_array($codigo, ['datos', 'duplicado', 'bd'], true);
                 <?php foreach ($vehiculos as $v): ?>
                     <tr>
                         <td><?= e($v['placa']) ?></td>
-                        <td><?= e($v['marca']) ?></td>
                         <td><?= e($v['color']) ?></td>
-                        <td><?= e($v['tipo']) ?></td>
+                        <td><?= e($v['marca']) ?></td>
+                        <td><?= e($v['tipo'] === 'publico' ? 'Público' : 'Particular') ?></td>
                         <td><?= e(trim(
                             $v['conductor_nombre'] . ' ' .
                             ($v['conductor_segundo_nombre'] ?? '') . ' ' .
