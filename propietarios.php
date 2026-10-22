@@ -15,7 +15,7 @@ $propietarios = $pdo->query(
 
 $mensajes = [
     'guardado' => 'Propietario registrado correctamente.',
-    'datos' => 'Completa todos los campos obligatorios.',
+    'datos' => 'Verifica los datos: documento numérico, nombres y ciudad con letras, y teléfono de 10 dígitos.',
     'duplicado' => 'La cédula ya está registrada.',
     'bd' => 'No fue posible guardar el propietario. Revisa los registros de PHP.'
 ];
@@ -36,7 +36,6 @@ $esError = in_array($codigo, ['datos', 'duplicado', 'bd'], true);
 <main>
     <h1>Registro de propietarios</h1>
     <p>Transportes ACME S.A.</p>
-
     <p><a href="index.php">Volver al menú principal</a></p>
 
     <?php if ($mensaje !== null): ?>
@@ -47,25 +46,82 @@ $esError = in_array($codigo, ['datos', 'duplicado', 'bd'], true);
 
     <form method="POST" action="guardar_propietario.php">
         <label for="cedula">Número de cédula *</label>
-        <input id="cedula" name="cedula" maxlength="20" required>
+        <input
+            type="text"
+            id="cedula"
+            name="cedula"
+            maxlength="20"
+            pattern="[0-9]+"
+            inputmode="numeric"
+            title="Ingrese únicamente números."
+            required
+        >
 
         <label for="primer_nombre">Primer nombre *</label>
-        <input id="primer_nombre" name="primer_nombre" maxlength="60" required>
+        <input
+            type="text"
+            id="primer_nombre"
+            name="primer_nombre"
+            maxlength="60"
+            pattern="[A-Za-zÁÉÍÓÚáéíóúÜüÑñ ]+"
+            title="Ingrese únicamente letras y espacios."
+            required
+        >
 
         <label for="segundo_nombre">Segundo nombre</label>
-        <input id="segundo_nombre" name="segundo_nombre" maxlength="60">
+        <input
+            type="text"
+            id="segundo_nombre"
+            name="segundo_nombre"
+            maxlength="60"
+            pattern="[A-Za-zÁÉÍÓÚáéíóúÜüÑñ ]*"
+            title="Ingrese únicamente letras y espacios."
+        >
 
         <label for="apellidos">Apellidos *</label>
-        <input id="apellidos" name="apellidos" maxlength="120" required>
+        <input
+            type="text"
+            id="apellidos"
+            name="apellidos"
+            maxlength="120"
+            pattern="[A-Za-zÁÉÍÓÚáéíóúÜüÑñ ]+"
+            title="Ingrese únicamente letras y espacios."
+            required
+        >
 
         <label for="direccion">Dirección *</label>
-        <input id="direccion" name="direccion" maxlength="180" required>
+        <input
+            type="text"
+            id="direccion"
+            name="direccion"
+            maxlength="180"
+            required
+        >
 
         <label for="telefono">Teléfono *</label>
-        <input id="telefono" name="telefono" maxlength="25" required>
+        <input
+            type="tel"
+            id="telefono"
+            name="telefono"
+            maxlength="10"
+            minlength="10"
+            pattern="[0-9]{10}"
+            inputmode="numeric"
+            title="Ingrese exactamente 10 dígitos numéricos."
+            placeholder="Ej. 3001234567"
+            required
+        >
 
         <label for="ciudad">Ciudad *</label>
-        <input id="ciudad" name="ciudad" maxlength="80" required>
+        <input
+            type="text"
+            id="ciudad"
+            name="ciudad"
+            maxlength="80"
+            pattern="[A-Za-zÁÉÍÓÚáéíóúÜüÑñ ]+"
+            title="Ingrese únicamente letras y espacios."
+            required
+        >
 
         <button type="submit">Guardar propietario</button>
     </form>
@@ -100,9 +156,7 @@ $esError = in_array($codigo, ['datos', 'duplicado', 'bd'], true);
 
                 <?php if (!$propietarios): ?>
                     <tr>
-                        <td colspan="5">
-                            Todavía no hay propietarios registrados.
-                        </td>
+                        <td colspan="5">Todavía no hay propietarios registrados.</td>
                     </tr>
                 <?php endif; ?>
             </tbody>
