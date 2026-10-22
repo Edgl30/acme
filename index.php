@@ -24,7 +24,9 @@ require_once __DIR__ . '/includes/header.php';
         </div>
 
         <div class="bienvenida-icono" aria-hidden="true">
-            <div class="circulo-icono">🚚</div>
+            <div class="circulo-icono">
+                <img src="img/coyote.png" alt="Icono del zorro">
+            </div>
             <span>Gestión de transporte</span>
             <small>Información organizada en un solo lugar</small>
         </div>
@@ -42,7 +44,7 @@ require_once __DIR__ . '/includes/header.php';
         <div class="tarjetas-acme">
 
             <a href="conductores.php" class="tarjeta-acme">
-                <div class="icono-tarjeta icono-azul">👤</div>
+                <div class="icono-tarjeta icono-azul">🐦</div>
                 <h3>Conductores</h3>
                 <p>Registra y consulta la información personal de los conductores.</p>
                 <span class="enlace-tarjeta">Ingresar al módulo <b>→</b></span>
