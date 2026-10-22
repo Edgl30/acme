@@ -8,7 +8,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Recibir y limpiar los datos
 $datos = [
     'cedula' => trim($_POST['cedula'] ?? ''),
     'primer_nombre' => trim($_POST['primer_nombre'] ?? ''),
@@ -19,7 +18,7 @@ $datos = [
     'ciudad' => trim($_POST['ciudad'] ?? '')
 ];
 
-// Validar campos obligatorios
+
 if (
     $datos['cedula'] === '' ||
     $datos['primer_nombre'] === '' ||
@@ -32,11 +31,9 @@ if (
     exit;
 }
 
-// Patrones de validación
 $soloNumeros = '/\A[0-9]+\z/';
 $soloLetras = '/\A[\p{L} ]+\z/u';
 
-// Documento: solo números, máximo 20 caracteres
 if (
     !preg_match($soloNumeros, $datos['cedula']) ||
     strlen($datos['cedula']) > 20
@@ -45,7 +42,6 @@ if (
     exit;
 }
 
-// Nombres, apellidos y ciudad: solo letras y espacios
 if (
     !preg_match($soloLetras, $datos['primer_nombre']) ||
     !preg_match($soloLetras, $datos['apellidos']) ||
@@ -55,7 +51,6 @@ if (
     exit;
 }
 
-// Segundo nombre: opcional
 if (
     $datos['segundo_nombre'] !== '' &&
     !preg_match($soloLetras, $datos['segundo_nombre'])
@@ -64,13 +59,11 @@ if (
     exit;
 }
 
-// Teléfono: exactamente 10 dígitos
 if (!preg_match('/\A[0-9]{10}\z/', $datos['telefono'])) {
     header('Location: propietarios.php?estado=datos');
     exit;
 }
 
-// Validar longitudes máximas de la base de datos
 if (
     mb_strlen($datos['primer_nombre']) > 60 ||
     mb_strlen($datos['segundo_nombre']) > 60 ||
@@ -82,7 +75,6 @@ if (
     exit;
 }
 
-// Guardar propietario
 try {
     $sql = "INSERT INTO propietarios (
         cedula,
@@ -104,7 +96,6 @@ try {
 
     $stmt = $pdo->prepare($sql);
 
-    // Segundo nombre opcional: guardar NULL si está vacío
     $datos['segundo_nombre'] =
         $datos['segundo_nombre'] === ''
             ? null

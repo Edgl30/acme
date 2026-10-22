@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Recibir y normalizar datos
+// Recibir y normalizar los datos
 $datos = [
     'placa' => strtoupper(trim($_POST['placa'] ?? '')),
     'color' => trim($_POST['color'] ?? ''),
@@ -18,7 +18,7 @@ $datos = [
     'propietario_cedula' => trim($_POST['propietario_cedula'] ?? '')
 ];
 
-// Validar campos obligatorios
+// Validar que todos los campos estén completos
 foreach ($datos as $valor) {
     if ($valor === '') {
         header('Location: vehiculos.php?estado=datos');
@@ -26,37 +26,49 @@ foreach ($datos as $valor) {
     }
 }
 
-// Validar placa: letras, números y guiones
+// Validar placa: ABC123 o ABC12D
 if (
-    !preg_match('/\A[A-Z0-9-]+\z/', $datos['placa']) ||
-    strlen($datos['placa']) > 10
+    !preg_match(
+        '/\A(?:[A-Z]{3}[0-9]{3}|[A-Z]{3}[0-9]{2}[A-Z])\z/',
+        $datos['placa']
+    )
 ) {
     header('Location: vehiculos.php?estado=datos');
     exit;
 }
 
-// Validar color: letras y espacios
-if (!preg_match('/\A[\p{L} ]+\z/u', $datos['color'])) {
+// Validar color: únicamente opciones permitidas
+$coloresPermitidos = [
+    'Blanco',
+    'Negro',
+    'Gris',
+    'Plateado',
+    'Rojo',
+    'Azul',
+    'Verde',
+    'Amarillo',
+    'Naranja',
+    'Café',
+    'Beige',
+    'Morado',
+    'Rosado'
+];
+
+if (!in_array($datos['color'], $coloresPermitidos, true)) {
     header('Location: vehiculos.php?estado=datos');
     exit;
 }
 
 // Validar marca: letras, números, espacios, puntos y guiones
-if (!preg_match('/\A[\p{L}0-9 .-]+\z/u', $datos['marca'])) {
-    header('Location: vehiculos.php?estado=datos');
-    exit;
-}
-
-// Validar longitudes según la base de datos
 if (
-    mb_strlen($datos['color']) > 40 ||
+    !preg_match('/\A[\p{L}0-9 .-]+\z/u', $datos['marca']) ||
     mb_strlen($datos['marca']) > 60
 ) {
     header('Location: vehiculos.php?estado=datos');
     exit;
 }
 
-// Validar el tipo de vehículo
+// Validar tipo de vehículo
 if (!in_array($datos['tipo'], ['particular', 'publico'], true)) {
     header('Location: vehiculos.php?estado=datos');
     exit;
@@ -66,7 +78,9 @@ if (!in_array($datos['tipo'], ['particular', 'publico'], true)) {
 $stmt = $pdo->prepare(
     'SELECT COUNT(*) FROM conductores WHERE cedula = :cedula'
 );
-$stmt->execute(['cedula' => $datos['conductor_cedula']]);
+$stmt->execute([
+    'cedula' => $datos['conductor_cedula']
+]);
 
 if ((int) $stmt->fetchColumn() === 0) {
     header('Location: vehiculos.php?estado=datos');
@@ -77,14 +91,16 @@ if ((int) $stmt->fetchColumn() === 0) {
 $stmt = $pdo->prepare(
     'SELECT COUNT(*) FROM propietarios WHERE cedula = :cedula'
 );
-$stmt->execute(['cedula' => $datos['propietario_cedula']]);
+$stmt->execute([
+    'cedula' => $datos['propietario_cedula']
+]);
 
 if ((int) $stmt->fetchColumn() === 0) {
     header('Location: vehiculos.php?estado=datos');
     exit;
 }
 
-// Insertar vehículo
+// Insertar el vehículo en la base de datos
 try {
     $sql = "INSERT INTO vehiculos (
         placa,

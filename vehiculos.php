@@ -6,7 +6,6 @@ function e($valor) {
     return htmlspecialchars((string) $valor, ENT_QUOTES, 'UTF-8');
 }
 
-// Obtener conductores y propietarios para los select
 $conductoresLista = $pdo->query(
     "SELECT cedula, primer_nombre, segundo_nombre, apellidos
      FROM conductores
@@ -19,7 +18,6 @@ $propietariosLista = $pdo->query(
      ORDER BY primer_nombre, apellidos"
 )->fetchAll();
 
-// Obtener vehículos registrados
 $vehiculos = $pdo->query(
     "SELECT v.placa, v.color, v.marca, v.tipo,
             c.primer_nombre AS conductor_nombre,
@@ -71,23 +69,34 @@ $esError = in_array($codigo, ['datos', 'duplicado', 'bd'], true);
             type="text"
             id="placa"
             name="placa"
-            maxlength="10"
-            pattern="[A-Za-z0-9-]+"
-            title="Ingrese una placa con letras, números o guion."
+            maxlength="6"
+            minlength="6"
+            pattern="([A-Za-z]{3}[0-9]{3}|[A-Za-z]{3}[0-9]{2}[A-Za-z])"
+            title="Formatos permitidos: ABC123 o ABC12D."
+            placeholder="Ej. ABC123"
             style="text-transform: uppercase;"
+            oninput="this.value = this.value.toUpperCase()"
             required
         >
 
+
         <label for="color">Color *</label>
-        <input
-            type="text"
-            id="color"
-            name="color"
-            maxlength="40"
-            pattern="[A-Za-zÁÉÍÓÚáéíóúÜüÑñ ]+"
-            title="Ingrese un color usando letras y espacios."
-            required
-        >
+        <select id="color" name="color" required>
+            <option value="">Seleccione un color</option>
+            <option value="Blanco">Blanco</option>
+            <option value="Negro">Negro</option>
+            <option value="Gris">Gris</option>
+            <option value="Plateado">Plateado</option>
+            <option value="Rojo">Rojo</option>
+            <option value="Azul">Azul</option>
+            <option value="Verde">Verde</option>
+            <option value="Amarillo">Amarillo</option>
+            <option value="Naranja">Naranja</option>
+            <option value="Café">Café</option>
+            <option value="Beige">Beige</option>
+            <option value="Morado">Morado</option>
+            <option value="Rosado">Rosado</option>
+        </select>
 
         <label for="marca">Marca *</label>
         <input
