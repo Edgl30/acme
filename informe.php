@@ -101,9 +101,7 @@ function escapar($valor) {
 $tituloPagina = 'Informe de vehículos | Transportes ACME S.A.';
 require_once __DIR__ . '/includes/header.php';
 ?>
-<head>
-    <link rel="stylesheet" href="css/estilos.css">
-</head>
+
 <main>
     <h1>Informe de vehículos</h1>
     <p>Filtra los registros y descarga el resultado de tu consulta.</p>
